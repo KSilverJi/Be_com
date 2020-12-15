@@ -1,0 +1,184 @@
+{% extends 'mate/base.html' %}
+
+{% load static %}
+
+{% block extra-style %}<link rel="stylesheet" type="text/css" href="{% static 'css/mate_style.css' %}">{% endblock %}
+
+{% block title %}Be.com - 짝꿍{% endblock %}
+
+
+{% block content %}
+<div class="container">
+  <div class="col-md-5" style="float: left;">
+    <!-- 프로필사진 -->
+    <div class="row mb-2">
+      <div class="mate-home-profile row no-gutters overflow-hidden flex-md-row mb-4 h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <div class="mate-title">프로필</div>
+          <div class="mate-profile-img">
+            <div class="mate-profile">
+              <a href="{% url 'myprofile:detail' mate.mate1.id %}">
+                <img src="{{mate.mate1.profile_image.url}}" width="100" height="100" style="border-radius:50px; border: 0.75px solid #C4C4C4;">
+                <div style="width:100px;">{{mate.mate1.username}}</div>
+              </a>
+            </div>
+            <img src="{% static 'img/mate-zigzag.png' %}" height="50" style="float:left; margin-top:20px;">
+            <div class="mate-profile">
+              <a href="{% url 'myprofile:detail' mate.mate2.id %}">
+                <img src="{{mate.mate2.profile_image.url}}" width="100" height="100" style="border-radius:50px; border: 0.75px solid #C4C4C4;">
+                <div style="width:100px;">{{mate.mate2.username}}</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Mate-Message -->
+    <div class="row mb-2">
+      <div class="mate-home-message row no-gutters overflow-hidden flex-md-row mb-4 h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <div class="mate-title">쪽지</div>
+          <div class="message">
+            <div class="message-list">
+              {% for message in messages.all %}
+                {% if message.sender == profile %}
+                  <div class="msg-mine">
+                    <div class="msg-mine-content">{{message.content}}</div>
+                    <div class="msg-mine-date">
+                      {% if message.created_string == False %}
+                        <div>{{ message.created_date|date:'m월 d일' }}</div>
+                      {% else %}
+                        <div>{{ message.created_string }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="msg-mate">
+                    <div class="msg-mate-content">{{message.content}}</div>
+                    <div class="msg-mate-date">
+                      {% if message.created_string == False %}
+                        {{ message.created_date|date:'m월 d일' }}
+                      {% else %}
+                        {{ message.created_string }}
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>            
+            <div class="message-input" style="width:100%; padding-top:12px;">
+              <form action="{% url 'mate:send_message' %}">
+                <input type="text" name="message" size="35" style="height:50px; border: 1px solid #BDBDBD; box-sizing: border-box; border-radius: 100px;">
+                <input type="image" src="{% static 'img/send_button.png' %}" name="submit" width="40" height="40" class="message-send-button">
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-7" style="float: right;">
+    <!-- 게이지 -->
+    <div class="row mb-2">
+      <div class="mate-home-percent row no-gutters overflow-hidden flex-md-row mb-4 h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <div class="mate-title">친밀도</div>
+          <div class="intimacy">
+            <div class="intimacy-text">
+              {% if mate.intimacy >= 0 and mate.intimacy <= 20 %}
+              아직은 어색하지만 서로에게 먼저 다가가보세요.<br>의외의 공통점을 발견할 수 있을지도 몰라요!
+              {% elif mate.intimacy <= 40 %}
+              한 발짝 한 발짝 서로에게 다가가고 있는 중인가요?<br>퀘스트를 완료하다보면 더욱 가까워질 수 있을 거예요!
+              {% elif mate.intimacy <= 60 %}
+              벌써 함께 보낸 시간이 이만큼이나 되네요!<br>앞으로 좋은 추억을 더 쌓아가길 바라요.
+              {% elif mate.intimacy <= 80 %}
+              두 분 정말 잘 맞는 친구네요!<br>절친이 되기까지 얼마 안 남았어요!
+              {% elif mate.intimacy <= 100 %}
+              한 학기 동안 정말 많은 시간을 함께했네요.<br>이제 두 분이 서로를 잘 아는 친구가 되었길 바라요!
+              {% endif %}
+            </div>
+            <div class="progress">
+              <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width:{{mate.intimacy}}%">
+                {{mate.intimacy}}%
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Mate-Photo -->
+    <div class="row mb-2">
+      <div class="mate-home-gallery row no-gutters overflow-hidden flex-md-row mb-4 h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <div>
+            <div class="mate-title">갤러리</div>
+            <a href="{% url 'mate:gallery' %}" style="font-weight:bold; float:right; color:#7A7A7A; font-size:14px;">더보기</a>
+          </div>
+          <div class="mate-gallery-imgs">
+            {% for photo in photos.all|slice:":3" %} <!-- 3개의 사진만 보여준다. -->
+                <img src="{{photo.image.url}}" height="150" class="mate-gallery-img">
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Mate-Quest -->
+    <div class="row mb-2">
+      <div class="mate-home-quest row no-gutters overflow-hidden flex-md-row mb-4 h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <div>
+            <div class="mate-title">퀘스트</div>
+            <a href="{% url 'mate:quest' %}" style="font-weight:bold; float:right; color:#7A7A7A; font-size:14px;">더보기</a>
+          </div>
+          <!--<div class="mate-quest-percent">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width:{{quest_done_per}}%">
+                  {{quest_done_per}}%
+                </div>
+              </div>
+          </div>-->
+          <div class="home-mate-quest-list">
+            {% if quests.quest1 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #00D2C9; color: #00D2C9; border: 1px solid #00D2C9;">도서관 가기</div>
+            {% endif %}
+            {% if quests.quest2 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #f99b0d; color: #f99b0d; border: 2px solid #f99b0d;">산책하기</div>
+            {% endif %}
+            {% if quests.quest3 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #D391FF; color: #D391FF; border: 2px solid #D391FF;">숙제하기</div>
+            {% endif %}
+            {% if quests.quest4 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #0D6BF9; color: #0D6BF9; border: 2px solid #0D6BF9;">선물 주기</div>
+            {% endif %}
+            {% if quests.quest5 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #FF7B55; color: #FF7B55; border: 2px solid #FF7B55;">봉사활동 가기</div>
+            {% endif %}
+            {% if quests.quest6 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #00D2C9; color: #00D2C9; border: 2px solid #00D2C9;">카페 가기</div>
+            {% endif %}
+            {% if quests.quest7 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #f99b0d; color: #f99b0d; border: 2px solid #f99b0d;">자전거 타기</div>
+            {% endif %}
+            {% if quests.quest8 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #D391FF; color: #D391FF; border: 2px solid #D391FF;">쇼핑하기</div>
+            {% endif %}
+            {% if quests.quest9 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #0D6BF9; color: #0D6BF9; border: 2px solid #0D6BF9;">편지 쓰기</div>
+            {% endif %}
+            {% if quests.quest10 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #FF7B55; color: #FF7B55; border: 2px solid #FF7B55;">밥 먹기</div>
+            {% endif %}
+            {% if quests.quest11 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #BBB500; color: #BBB500; border: 2px solid #BBB500;">영화 보기</div>
+            {% endif %}
+            {% if quests.quest12 == 0 %}
+              <div class="home-mate-quest-card" style="border: 1px solid #F90D6B; color: #F90D6B; border: 2px solid #F90D6B;">게임하기</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
